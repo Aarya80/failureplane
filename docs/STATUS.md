@@ -6,11 +6,11 @@ Snapshot: 2026-10-11
 
 Phase 0 proof completed.
 Issue #1 complete.
-Issue #2 local implementation and tests verified; final CI pending.
+Issue #2 complete: local tests and GitHub CI verified.
 Issues #3–15 planned.
 
 Locally verified Issue #2 test commits: 3e4d496 and d297b74.
-GitHub CI verification for Issue #2 is pending.
+GitHub Actions run 38198766481 passed on commit 0651280.
 
 ## Verified — Issue #1
 
@@ -21,7 +21,7 @@ GitHub CI verification for Issue #2 is pending.
 - Provider-idempotent retry demonstrated in the mock experiment.
 - GitHub Actions run 38193694278 completed successfully.
 
-## Verified locally — Issue #2
+## Verified — Issue #2
 
 - Existing pure Go ownership reducer reviewed.
 - Existing arbitrary command-sequence fuzz test retained.
@@ -74,7 +74,6 @@ are not implemented.
 
 ## Next actions
 
-1. Review and commit this status update.
-2. Push Issue #2 commits and verify GitHub Actions CI.
-3. Begin Issue #3: PostgreSQL migrations and integration harness
-   only after Issue #2 completion is confirmed.
+1. Commit and push the final Issue #2 status update.
+2. Verify CI on the documentation-only commit.
+3. Begin Issue #3: PostgreSQL migrations and integration harness.
