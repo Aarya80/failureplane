@@ -1,47 +1,80 @@
 # Current project status
 
-Last packaged: 2026-10-11
+Snapshot: 2026-10-11
 
-VERIFIED LOCALLY:
-- `go test ./...` passes.
-- `go test -race ./...` passes.
-- `go vet ./...` passes.
-- `go run ./cmd/failureplane demo` demonstrates stale-generation rejection.
-- Pure state machine models uncertain-effect -> reconciliation-required.
-- Python stdlib loopback experiment proves a provider can accept a write even
-  when the caller receives no response, and shows provider idempotency.
+## Current milestone
 
-DESIGNED, NOT IMPLEMENTED:
-- PostgreSQL schema (SQL provided; database migration not applied here).
-- HTTP API, scheduler, worker, Rust/Wasmtime runner, effect broker, replay,
-  real fault controller, SDK, dashboard, benchmarks, deployment.
+Phase 0 proof completed.
+Issue #1 complete.
+Issue #2 local implementation and tests verified; final CI pending.
+Issues #3–15 planned.
 
-NEXT TASK:
-- Issue #1: review invariant/ADR, then issue #3 persistence schema harness or
-  issue #2 state-machine expansion. The first five issues are in `issues/`.
+Locally verified Issue #2 test commits: 3e4d496 and d297b74.
+GitHub CI verification for Issue #2 is pending.
 
-IMPORTANT:
-The `ExpireSafe` command requires the future durable repository to prove
-lease expiry and safe retry using authoritative DB/effect state. The in-memory
-demo is not evidence of distributed recovery.
+## Verified — Issue #1
 
-## Issue #1 local verification — 2026-10-11
+- Execution invariants and failure timelines documented.
+- Pure reducer rejects stale-generation completion.
+- Reconciliation-required state rejects ordinary worker commands.
+- Python mock-provider demonstrates an accepted write with lost response.
+- Provider-idempotent retry demonstrated in the mock experiment.
+- GitHub Actions run 38193694278 completed successfully.
 
-VERIFIED:
-- TestReconciliationRequiredRejectsAllWorkerCommands passes
-  for all six existing worker commands.
-- go test ./... passed after the new regression test.
-- go test -race ./... passed after the new regression test.
-- go vet ./... passed after the new regression test.
-- git diff --check passed after adding failure timelines.
-- Stale-owner and ambiguous-effect timelines documented.
+## Verified locally — Issue #2
 
-BOUNDARIES:
-- Reconciliation enforcement is currently in-memory only.
-- PostgreSQL lease fencing and effect brokerage are planned.
-- GitHub CI passed on initial commit 92eaeed; Issue #1 changes
-  have not yet been pushed or verified by CI.
+- Existing pure Go ownership reducer reviewed.
+- Existing arbitrary command-sequence fuzz test retained.
+- Stale-generation fuzz test added in commit 3e4d496.
+- Invalid-transition matrix added in commit d297b74.
+- All 27 forbidden state-command combinations passed.
+- Stale-generation fuzz seeds passed.
+- Active stale-generation fuzz run completed 56,205 executions
+  without a reported failure.
+- go test ./... passed.
+- go test -race ./... passed.
+- go vet ./... produced no diagnostics.
+- gofmt and git diff --check produced no issues.
 
-NEXT:
-- Commit Issue #1 changes and verify GitHub CI.
-- Begin Issue #2: strengthen state-machine property and fuzz tests.
+The fuzz execution count is test evidence, not a
+performance benchmark.
+
+## Issue #2 invariant-to-test mapping
+
+| Property | Tests |
+| --- | --- |
+| Generation never decreases | FuzzTransitions |
+| Stale generation cannot mutate state | TestStaleWorkerCannotCommitAfterReclaim, FuzzStaleGenerationCannotMutate |
+| Terminal states cannot reopen | TestTerminalStateIsImmutable, FuzzTransitions |
+| Invalid transitions preserve state | TestInvalidTransitionMatrix |
+| Unknown effect prevents ordinary retry | TestUnknownExternalEffectCannotBeReclaimed, TestReconciliationRequiredRejectsAllWorkerCommands |
+| Generation overflow rejected | TestClaimGenerationOverflow |
+| Invalid state and command rejected | TestInvalidStateOrCommand |
+
+Error classification:
+- ErrInvalidState: unrecognized execution status.
+- ErrStaleGeneration: expected generation mismatch.
+- ErrInvalidTransition: forbidden state-command transition.
+- ErrGenerationOverflow: claim would overflow generation counter.
+
+## Boundaries and non-guarantees
+
+The pure reducer does not enforce worker identity,
+lease expiry, database transactions, or durable effects.
+
+ExpireSafe requires the future repository to establish
+lease expiry and prove retry safety before invocation.
+
+No exactly-once execution or arbitrary external-effect
+guarantee is provided.
+
+PostgreSQL durability, real workers, Wasmtime isolation,
+external-effect brokerage, logical replay, and benchmarks
+are not implemented.
+
+## Next actions
+
+1. Review and commit this status update.
+2. Push Issue #2 commits and verify GitHub Actions CI.
+3. Begin Issue #3: PostgreSQL migrations and integration harness
+   only after Issue #2 completion is confirmed.
