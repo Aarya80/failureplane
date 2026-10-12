@@ -1,0 +1,16 @@
+Order,Title,Depends on,Status
+1,Define execution invariants and protocol boundaries,,Planned
+2,Implement and test execution ownership state machine,1,Planned
+3,Implement initial PostgreSQL migrations and test harness,"1,2",Planned
+4,Implement idempotent execution submission API,3,Planned
+5,Implement atomic leasing and worker claim,"3,4",Planned
+6,Add fenced start heartbeat and terminal completion,5,Planned
+7,Build a minimal Go worker service,"5,6",Planned
+8,Make ordered event journal atomic,"3,5,6",Planned
+9,Prototype restricted Rust Wasmtime tool host,1,Planned
+10,Define and implement worker-to-runner boundary,"7,9",Planned
+11,Implement brokered effects and reconciliation state,"8,10",Planned
+12,Build offline logical replay and divergence reporter,"9,11",Planned
+13,Implement seeded worker and network fault scenarios,"6,11,12",Planned
+14,Benchmark worker scaling fairness and overhead,"7,8,10,13",Planned
+15,Ship first complete developer UX vertical slice,"10,11,12,13,14",Planned

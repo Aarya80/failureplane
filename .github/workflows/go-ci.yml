@@ -1,0 +1,25 @@
+name: Go CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Test
+        run: go test ./...
+      - name: Race checks
+        run: go test -race ./...
+      - name: Ambiguous-effect proof
+        run: python3 examples/faults/ambiguous_effect_spike.py
+      - name: Vet
+        run: go vet ./...
+      - name: Format
+        run: test -z "$(gofmt -l ./cmd ./internal)"

@@ -1,0 +1,14 @@
+// FUTURE contract only. The Rust runner and WIT bindings are not yet built.
+package failureplane:tool@0.1.0;
+
+interface effects {
+    // Request/response JSON strings are only for the initial ABI spike.
+    // The host resolves capability names to allowlisted operations.
+    call: func(key: string, capability: string, request: string)
+        -> result<string, string>;
+}
+
+world tool {
+    import effects;
+    export run: func(input: string) -> result<string, string>;
+}

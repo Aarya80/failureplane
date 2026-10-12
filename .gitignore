@@ -1,0 +1,27 @@
+# Editor / operating system
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local secrets / environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Builds, generated artifacts
+bin/
+dist/
+build/
+target/
+node_modules/
+coverage/
+*.test
+*.prof
+*.out
+
+# Benchmark and local execution evidence (tracked aggregate examples go elsewhere)
+benchmarks/results/local/
+local-data/

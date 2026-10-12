@@ -1,0 +1,18 @@
+name: Bug report
+about: Report a reproducible bug or violated invariant
+labels: [bug]
+body:
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Actual vs expected behavior
+      description: Include the violated guarantee or invariant if known.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include command, seed, tool digest, versions, and logs with secrets removed.
+    validations:
+      required: true

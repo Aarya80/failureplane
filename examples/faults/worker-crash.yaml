@@ -1,0 +1,9 @@
+# FUTURE fault DSL example. Not executable until issue #13 is implemented.
+name: worker-crash-before-result-commit
+seed: 42
+faults:
+  - when:
+      event: attempt.result_prepared
+      occurrence: 1
+    action:
+      type: terminate_worker
