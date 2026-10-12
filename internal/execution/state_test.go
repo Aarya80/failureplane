@@ -145,3 +145,88 @@ func TestReconciliationRequiredRejectsAllWorkerCommands(t *testing.T) {
 		})
 	}
 }
+
+// TestInvalidTransitionMatrix verifies that every forbidden
+// state-command combination is rejected without mutating state.
+// Generation matches intentionally so errors identify invalid
+// transitions rather than stale ownership.
+func TestInvalidTransitionMatrix(t *testing.T) {
+	allCommands := []CommandType{
+		Claim,
+		Start,
+		Complete,
+		Fail,
+		ExpireSafe,
+		ExpireUncertain,
+	}
+
+	tests := []struct {
+		status  Status
+		allowed map[CommandType]bool
+	}{
+		{
+			status:  Queued,
+			allowed: map[CommandType]bool{Claim: true},
+		},
+		{
+			status: Leased,
+			allowed: map[CommandType]bool{
+				Start:           true,
+				Fail:            true,
+				ExpireSafe:      true,
+				ExpireUncertain: true,
+			},
+		},
+		{
+			status: Running,
+			allowed: map[CommandType]bool{
+				Complete:        true,
+				Fail:            true,
+				ExpireSafe:      true,
+				ExpireUncertain: true,
+			},
+		},
+		{status: Succeeded},
+		{status: Failed},
+		{status: ReconciliationRequired},
+	}
+
+	for _, tc := range tests {
+		t.Run(string(tc.status), func(t *testing.T) {
+			for _, commandType := range allCommands {
+				if tc.allowed[commandType] {
+					continue
+				}
+
+				t.Run(string(commandType), func(t *testing.T) {
+					before := State{
+						Status:     tc.status,
+						Generation: 5,
+					}
+
+					next, err := Apply(before, Command{
+						Type:               commandType,
+						ExpectedGeneration: before.Generation,
+					})
+
+					if !errors.Is(err, ErrInvalidTransition) {
+						t.Fatalf(
+							"status=%s command=%s: expected invalid transition, got %v",
+							tc.status,
+							commandType,
+							err,
+						)
+					}
+
+					if next != before {
+						t.Fatalf(
+							"rejected transition mutated state: before=%+v after=%+v",
+							before,
+							next,
+						)
+					}
+				})
+			}
+		})
+	}
+}
