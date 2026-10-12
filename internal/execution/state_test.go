@@ -103,3 +103,45 @@ func TestInvalidStateOrCommand(t *testing.T) {
 		t.Fatalf("wanted invalid transition; got %v", err)
 	}
 }
+
+func TestReconciliationRequiredRejectsAllWorkerCommands(t *testing.T) {
+	state := State{
+		Status:     ReconciliationRequired,
+		Generation: 4,
+	}
+
+	commands := []CommandType{
+		Claim,
+		Start,
+		Complete,
+		Fail,
+		ExpireSafe,
+		ExpireUncertain,
+	}
+
+	for _, commandType := range commands {
+		t.Run(string(commandType), func(t *testing.T) {
+			next, err := Apply(state, Command{
+				Type:               commandType,
+				ExpectedGeneration: 4,
+			})
+
+			if !errors.Is(err, ErrInvalidTransition) {
+				t.Fatalf(
+					"command %s: expected invalid transition, got %v",
+					commandType,
+					err,
+				)
+			}
+
+			if next != state {
+				t.Fatalf(
+					"command %s changed reconciliation state: before=%+v after=%+v",
+					commandType,
+					state,
+					next,
+				)
+			}
+		})
+	}
+}

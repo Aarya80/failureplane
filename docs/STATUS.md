@@ -24,3 +24,24 @@ IMPORTANT:
 The `ExpireSafe` command requires the future durable repository to prove
 lease expiry and safe retry using authoritative DB/effect state. The in-memory
 demo is not evidence of distributed recovery.
+
+## Issue #1 local verification — 2026-10-11
+
+VERIFIED:
+- TestReconciliationRequiredRejectsAllWorkerCommands passes
+  for all six existing worker commands.
+- go test ./... passed after the new regression test.
+- go test -race ./... passed after the new regression test.
+- go vet ./... passed after the new regression test.
+- git diff --check passed after adding failure timelines.
+- Stale-owner and ambiguous-effect timelines documented.
+
+BOUNDARIES:
+- Reconciliation enforcement is currently in-memory only.
+- PostgreSQL lease fencing and effect brokerage are planned.
+- GitHub CI passed on initial commit 92eaeed; Issue #1 changes
+  have not yet been pushed or verified by CI.
+
+NEXT:
+- Commit Issue #1 changes and verify GitHub CI.
+- Begin Issue #2: strengthen state-machine property and fuzz tests.
